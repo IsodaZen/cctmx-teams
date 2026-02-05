@@ -1,0 +1,12 @@
+{
+  "name": "cctmx-teams",
+  "version": "0.1.0",
+  "description": "Tmux-based multi-instance Claude Code management plugin for team development patterns",
+  "author": {
+    "name": "IsodaZen",
+    "email": "25547781+IsodaZen@users.noreply.github.com"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/IsodaZen/cctmx-teams",
+  "keywords": ["tmux", "team", "multi-instance", "workflow", "leader-worker"]
+}

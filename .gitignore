@@ -1,0 +1,14 @@
+# Claude Code settings
+.claude/*.local.md
+.claude/*.local.json
+.claude/worker-info
+.claude/.task-counter-*
+
+# Logs
+*.log
+
+# macOS
+.DS_Store
+
+# Editor
+.idea/
