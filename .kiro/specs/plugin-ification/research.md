@@ -8,11 +8,13 @@
 ## Summary
 
 - **Feature**: `plugin-ification`
-- **Discovery Scope**: New Feature（Claude Codeプラグインとしての新規実装）
+- **Discovery Scope**: Extension（既存実装をプラグイン構造に適合させる拡張）
+- **Discovery Type**: Light Discovery
 - **Key Findings**:
   - Claude Codeプラグインは `.claude-plugin/plugin.json` をマニフェストとする標準構造を持つ
   - `${CLAUDE_PLUGIN_ROOT}` 変数でポータブルなパス参照が可能
   - 全スクリプトで環境変数ベースのパス参照を徹底する必要がある
+  - session-start.sh は全エラーで exit 0 を返し、セッション開始をブロックしない設計
 
 ## Research Log
 
@@ -27,6 +29,7 @@
   - `plugin.json` にメタデータ（name, version, description, author, license等）を定義
   - スクリプトパスは `${CLAUDE_PLUGIN_ROOT}` で参照可能
   - Hookは `hooks.json` で定義し、SessionStart等のイベントに紐づけ
+  - Hookのtimeout設定は hooks.json 内で指定（本プラグインは10秒）
 - **Implications**: 4スキル + 1フックの構成はプラグイン仕様に直接マッピング可能
 
 ### パス設計の調査
@@ -38,6 +41,7 @@
   - 一時ファイルは `${SCRATCHPAD_DIR}` を使用する
   - プロジェクト固有データは `${CLAUDE_PROJECT_DIR}/.claude/` 配下に保存する
   - worker-info ファイル: `${CLAUDE_PROJECT_DIR}/.claude/worker-info` に保存（プロジェクト固有情報のため適切）
+  - 環境変数永続化は `CLAUDE_ENV_FILE` に追記する方式
 - **Implications**: scratchpadパスは `${SCRATCHPAD_DIR}`、スクリプトパスは `${CLAUDE_PLUGIN_ROOT}` で統一する
 
 ### タスクID設計の検討
@@ -49,6 +53,19 @@
   - カウンターファイルは日付単位でリセットが自然
   - タスク履歴の永続化は過剰（ワーカー出力で追跡可能）
 - **Implications**: シンプルなカウンターファイル方式を採用し、履歴保存は見送り
+
+### 既存実装の構造分析
+
+- **Context**: 設計ドキュメント生成時の既存コードベース分析
+- **Sources Consulted**: プロジェクト内の全スクリプト、設定ファイル
+- **Findings**:
+  - 全スクリプトが `set -euo pipefail` を使用（steering準拠）
+  - 環境変数は3層構造: フレームワーク層 → Hook層 → スキル層
+  - ファイルベースの状態共有: worker-info（Shell export形式）、task-counter（整数テキスト）
+  - session-start.sh のロール判定: ペイン番号0 = leader、それ以外 = worker
+  - エラーメッセージは日本語で標準エラー出力へ
+  - テスト: 29/29合格（構造、JSON、権限、構文、shellcheck、ポータビリティ）
+- **Implications**: 既存実装は設計仕様に完全準拠。design.mdは実装を正確に反映。
 
 ## Architecture Pattern Evaluation
 
@@ -92,11 +109,44 @@
 - **Trade-offs**: 実行時のsource先の検証はスクリプト内で自前で行う必要がある
 - **Follow-up**: worker-info読み込み前の存在チェックを必ず実装
 
+### Decision: SessionStart Hookのエラーハンドリング方式
+
+- **Context**: session-start.sh でエラーが発生した場合の挙動
+- **Alternatives Considered**:
+  1. エラー時に exit 1 でセッション開始をブロック
+  2. 全エラーで exit 0 を返しセッション開始を継続
+- **Selected Approach**: 全エラーで exit 0（セッション開始をブロックしない）
+- **Rationale**: tmux環境外でも Claude Code を正常に使用できるべき。Hookの失敗がセッション全体を止めるのは過剰
+- **Trade-offs**: 設定エラーがサイレントに無視される可能性。警告メッセージで緩和。
+- **Follow-up**: デバッグログ（`/tmp/cctmx-teams-hook-session-start.log`）で問題追跡可能
+
+### Decision: setupコマンドによる導入先プロジェクトの.gitignore管理
+
+- **Context**: 状態ファイル（`worker-info`, `.task-counter-*`）はプラグイン導入先のプロジェクトに作成される。本リポジトリの `.gitignore` に追加しても導入先には影響しない
+- **Alternatives Considered**:
+  1. ユーザーに手動で `.gitignore` を編集させる
+  2. setupコマンドで導入先の `.gitignore` に自動追記する
+- **Selected Approach**: setupコマンドで自動追記（未登録パターンのみ）
+- **Rationale**: セットアップ時に一括で環境を整えることで、状態ファイルの誤コミットを防止。既存エントリとの重複チェックにより冪等性を確保
+- **Trade-offs**: `.gitignore` への自動書き込みはユーザーの意図しない変更になりうるが、setupコマンドは明示的に実行されるため許容範囲
+- **対象パターン**: `.claude/worker-info`, `.claude/.task-counter-*`
+
+### Decision: 古いタスクカウンターファイルの自動削除
+
+- **Context**: `.task-counter-YYYYMMDD` ファイルが日付ごとに新規作成され、古いファイルが `.claude/` 配下に残留し続ける
+- **Alternatives Considered**:
+  1. 手動削除 — ユーザーが定期的にクリーンアップ
+  2. send-instruction.sh 実行時に当日以外のファイルを自動削除
+- **Selected Approach**: send-instruction.sh 実行時に自動削除
+- **Rationale**: ユーザーに管理負担をかけず、状態ファイルの肥大化を防止する。当日以外のカウンターは不要（日付リセット設計のため）
+- **Trade-offs**: 過去の採番情報が失われるが、タスクIDはワーカー出力に残るため問題なし
+
 ## Risks & Mitigations
 
-- tmux環境外での実行 — SessionStart Hookで検出しエラーメッセージ表示
+- tmux環境外での実行 — SessionStart Hookで検出し警告メッセージ表示、exit 0で続行
 - ワーカーペイン情報の破損 — 各スクリプトで読み込み前に存在チェックとバリデーション
 - Claude Code環境変数の未設定 — デフォルト値のフォールバックとエラーメッセージ
+- Hookタイムアウト — 10秒以内で完了する設計、重い処理を含めない
 
 ## References
 

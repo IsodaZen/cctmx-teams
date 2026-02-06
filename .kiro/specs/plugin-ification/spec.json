@@ -1,16 +1,16 @@
 {
   "feature_name": "plugin-ification",
   "created_at": "2026-02-06T04:36:09Z",
-  "updated_at": "2026-02-06T10:28:54Z",
+  "updated_at": "2026-02-06T12:00:00Z",
   "language": "ja",
-  "phase": "requirements-generated",
+  "phase": "design-generated",
   "approvals": {
     "requirements": {
       "generated": true,
-      "approved": false
+      "approved": true
     },
     "design": {
-      "generated": false,
+      "generated": true,
       "approved": false
     },
     "tasks": {
@@ -20,4 +20,3 @@
   },
   "ready_for_implementation": false
 }
-
