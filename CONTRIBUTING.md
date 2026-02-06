@@ -1,434 +1,227 @@
-# Contributing to cctmx-teams
+# cctmx-teams への貢献について
 
-Thank you for your interest in contributing to cctmx-teams! This document provides guidelines for contributing to the project.
-
----
-
-## 🎯 Project Overview
-
-cctmx-teams is a Claude Code plugin that enables multi-instance Claude Code management in tmux environments using the leader-worker pattern.
-
-**Goals:**
-
-- Efficient task delegation between leader and worker instances
-- Clear role separation for better code review
-- Automation through hooks and skills
-- High code quality and security
+cctmx-teamsにご興味をお持ちいただきありがとうございます。このドキュメントでは、プロジェクトへの貢献方法について説明します。
 
 ---
 
-## 🚀 Getting Started
+## 🎯 プロジェクト概要
 
-### Prerequisites
+cctmx-teamsは、tmux環境で複数のClaude Codeインスタンスを管理するClaude Codeプラグインです。リーダー・ワーカーパターンを採用しています。
 
-- macOS or Linux
-- tmux 3.x or higher
-- Claude Code
-- Bash 4.0 or higher
-- shellcheck (for development)
+**目標：**
 
-### Development Setup
-
-1. **Clone the repository**
-
-   ```bash
-   git clone https://github.com/IsodaZen/cctmx-teams.git
-   cd cctmx-teams
-   ```
-
-2. **Install development tools**
-
-   ```bash
-   # Install shellcheck
-   brew install shellcheck
-
-   # Install jq (for JSON validation)
-   brew install jq
-   ```
-
-3. **Run tests**
-
-   ```bash
-   bash tests/run-tests.sh
-   ```
-
-4. **Test locally**
-
-   ```bash
-   # Link to Claude plugins directory
-   ln -s $(pwd) ~/.claude/plugins/cctmx-teams
-
-   # Start tmux and test
-   tmux new-session -s cctmx-dev
-   claude
-   ```
+- リーダーとワーカーインスタンス間の効率的なタスク委譲
+- より良いコードレビューのための明確な役割分担
+- フックとスキルを通じた自動化
+- 高いコード品質とセキュリティ
 
 ---
 
-## 📝 Development Guidelines
+## 📋 貢献ポリシー
 
-### Code Style
+**このプロジェクトは、外部からのプルリクエストは基本的に受け付けていません。**
 
-#### Shell Scripts
+開発は主にメンテナーによって行われますが、以下の形での貢献は大歓迎です：
 
-- Use `#!/bin/bash` shebang
-- Always use `set -euo pipefail` for strict mode
-- Quote all variables: `"${variable}"`
-- Use meaningful variable names
-- Add comments for complex logic
-- Pass shellcheck validation with no warnings
+- 🐛 **バグ報告**: 問題を発見された場合は、Issueで報告してください
+- 💡 **機能要望**: 新機能のアイデアがあれば、Issueで提案してください
+- 📚 **ドキュメントの改善提案**: ドキュメントの不明点や改善案を報告してください
+- 💬 **ディスカッション**: GitHub Discussionsで質問や意見交換をしてください
 
-**Example:**
+コードの貢献を検討されている場合は、まずIssueで相談してください。特定の状況では、プルリクエストを検討させていただく場合があります。
 
-```bash
-#!/bin/bash
-set -euo pipefail
+---
 
-# Function description
-function_name() {
-  local variable="${1}"
+## 🐛 バグ報告
 
-  if [ -z "${variable:-}" ]; then
-    echo "Error message" >&2
-    return 1
-  fi
+バグを発見された場合は、以下の手順でご報告ください。
 
-  # More logic here
-}
-```
+### 報告前のチェック
 
-#### Markdown
+1. [既存のIssue](https://github.com/IsodaZen/cctmx-teams/issues)を確認
+2. 最新バージョンでテスト
+3. 必要な情報を収集
 
-- Use ATX-style headers (`#` not `===`)
-- Keep lines under 120 characters where possible
-- Use fenced code blocks with language specified
-- Include blank lines before and after code blocks
-
-### Skills
-
-**SKILL.md Structure:**
+### バグ報告テンプレート
 
 ```markdown
----
-name: Skill Name
-description: Clear description with trigger phrases like "when to use", "トリガーフレーズ"
-version: X.Y.Z
----
+## バグ報告
 
-# 実行指示
+**概要:**
+問題の簡潔な説明
 
-Bash script execution instructions using ${CLAUDE_PLUGIN_ROOT}
+**期待される動作:**
+本来どうなるべきか
 
----
+**実際の動作:**
+実際に何が起こるか
 
-# Skill Name
+**再現手順:**
+1. 手順1
+2. 手順2
+3. 手順3
 
-Detailed documentation...
+**環境:**
+- OS: macOS/Linux
+- tmuxバージョン: X.Y.Z
+- Claude Codeバージョン: X.Y.Z
+- cctmx-teamsバージョン: X.Y.Z
+
+**ログ・エラーメッセージ:**
 ```
 
-**Requirements:**
+ログやエラーメッセージをここに貼り付け
 
-- Clear trigger phrases in description
-- Use `${CLAUDE_PLUGIN_ROOT}` for portability
-- Include troubleshooting section
-- Provide usage examples
+```
 
-### Commands
+**スクリーンショット:**
+該当する場合は、スクリーンショットを追加
+```
 
-**Command Structure:**
+---
+
+## 💡 機能要望
+
+機能要望は大歓迎です！以下の情報を含めてください：
+
+1. 既に同様の要望がないか確認
+2. 機能を明確に説明
+3. ユースケースを説明
+4. 可能であれば具体例を提供
+
+**テンプレート:**
 
 ```markdown
----
-name: command-name
-description: Brief description
-allowed-tools: [Bash, Read, Write]
-argument-hint: (hint for users)
----
+## 機能要望
 
-# Command Name
+**機能の説明:**
+提案する機能の明確な説明
 
-Implementation instructions for Claude...
+**ユースケース:**
+なぜこの機能が必要か？
+
+**実装案（任意）:**
+どのように実装できるかのアイデア
+
+**検討した代替案:**
+他に考えたアプローチ
 ```
 
-**Requirements:**
+---
 
-- Clear implementation instructions
-- Specify allowed-tools
-- Include error handling guidance
-- Provide troubleshooting tips
+## 📝 開発ガイドライン
 
-### Hooks
+### コードスタイルとコンポーネント構造
 
-**Requirements:**
+プロジェクトのコードスタイルとプラグインコンポーネントの構造ルールは、`.claude/rules/`ディレクトリに定義されています：
 
-- Use `${CLAUDE_PLUGIN_ROOT}` for script paths
-- Include timeout
-- Provide informative systemMessage
-- Handle all error cases gracefully
-- Test both tmux and non-tmux environments
+- **[シェルスクリプト](./.claude/rules/shell-scripts.md)**: シェルスクリプトのコードスタイルガイド
+- **[Markdown](./.claude/rules/markdown.md)**: Markdownファイルのスタイルガイド
+- **[プラグインコンポーネント](./.claude/rules/plugin-components.md)**: スキル、コマンド、フックの構造ガイド
+
+これらのルールは、Claude Codeがpathベースで自動的に参照します
 
 ---
 
-## 🧪 Testing
+## 🧪 テスト
 
-### Running Tests
+### テストの実行
 
 ```bash
-# Run automated tests
+# 自動テストの実行
 bash tests/run-tests.sh
 
-# Run shellcheck
+# shellcheckの実行
 shellcheck skills/*/scripts/*.sh hooks/scripts/*.sh
 
-# Validate JSON
+# JSON検証
 jq . .claude-plugin/plugin.json
 jq . hooks/hooks.json
 ```
 
-### Manual Testing
+### 手動テスト
 
-Follow the comprehensive guide in `TESTING-GUIDE.md`:
+`TESTING-GUIDE.md`の包括的なガイドに従ってください：
 
-1. Plugin structure tests
-2. Component unit tests
-3. Integration tests (tmux environment)
-4. Error handling tests
-5. Documentation validation
-6. End-to-end workflow test
+1. プラグイン構造テスト
+2. コンポーネント単体テスト
+3. 統合テスト（tmux環境）
+4. エラーハンドリングテスト
+5. ドキュメント検証
+6. エンドツーエンドワークフローテスト
 
-### Writing New Tests
+### 新しいテストの作成
 
-When adding new features, update:
+新機能を追加する際は、以下を更新してください：
 
-- `tests/run-tests.sh` - Add automated tests
-- `TESTING-GUIDE.md` - Add manual test cases
-
----
-
-## 🔧 Submitting Changes
-
-### Before Submitting
-
-1. **Run all tests**
-
-   ```bash
-   bash tests/run-tests.sh
-   shellcheck skills/*/scripts/*.sh hooks/scripts/*.sh
-   ```
-
-2. **Update documentation**
-   - Update README.md if adding user-facing features
-   - Update CHANGELOG.md with your changes
-   - Add/update comments in code
-
-3. **Check code quality**
-   - No shellcheck warnings
-   - Proper error handling
-   - Clear variable names
-   - Comments for complex logic
-
-### Pull Request Process
-
-1. **Fork the repository**
-
-   ```bash
-   # Fork on GitHub, then clone
-   git clone https://github.com/YOUR-USERNAME/cctmx-teams.git
-   cd cctmx-teams
-   git remote add upstream https://github.com/IsodaZen/cctmx-teams.git
-   ```
-
-2. **Create a feature branch**
-
-   ```bash
-   git checkout -b feature/your-feature-name
-   # or
-   git checkout -b fix/your-bug-fix
-   ```
-
-3. **Make your changes**
-   - Follow the code style guidelines
-   - Add tests for new functionality
-   - Update documentation
-
-4. **Commit your changes**
-
-   ```bash
-   git add .
-   git commit -m "feat: add new feature"
-   # or
-   git commit -m "fix: resolve issue with worker detection"
-   ```
-
-   **Commit message format:**
-   - `feat:` New feature
-   - `fix:` Bug fix
-   - `docs:` Documentation changes
-   - `test:` Test additions/changes
-   - `refactor:` Code refactoring
-   - `chore:` Maintenance tasks
-
-5. **Push to your fork**
-
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-
-6. **Create a Pull Request**
-   - Go to GitHub and create a PR
-   - Fill out the PR template
-   - Link related issues
-   - Request review
-
-### PR Checklist
-
-- [ ] Tests pass (`bash tests/run-tests.sh`)
-- [ ] shellcheck validation passes
-- [ ] Documentation updated
-- [ ] CHANGELOG.md updated
-- [ ] Commit messages follow convention
-- [ ] PR description is clear and complete
+- `tests/run-tests.sh` - 自動テストを追加
+- `TESTING-GUIDE.md` - 手動テストケースを追加
 
 ---
 
-## 🐛 Reporting Issues
+## 📚 ドキュメント
 
-### Before Reporting
+### ドキュメント化が必要な領域
 
-1. Check [existing issues](https://github.com/IsodaZen/cctmx-teams/issues)
-2. Test with latest version
-3. Gather necessary information
+- README.md: ユーザー向け機能
+- コードコメント: 技術的な詳細
+- docs/: 開発プロセス
+- TESTING-GUIDE.md: テスト手順
+- CHANGELOG.md: API変更
 
-### Issue Template
+### ドキュメントのスタイル
 
-```markdown
-## Bug Report
-
-**Description:**
-Brief description of the issue
-
-**Expected Behavior:**
-What should happen
-
-**Actual Behavior:**
-What actually happens
-
-**Steps to Reproduce:**
-1. Step 1
-2. Step 2
-3. Step 3
-
-**Environment:**
-- OS: macOS/Linux
-- tmux version: X.Y.Z
-- Claude Code version: X.Y.Z
-- cctmx-teams version: X.Y.Z
-
-**Logs/Errors:**
-```
-
-Paste logs or error messages
-
-```
-
-**Screenshots:**
-If applicable, add screenshots
-```
+- 明確で簡潔な言葉を使用
+- 例を提供
+- トラブルシューティングのヒントを含める
+- 適切な行の長さを保つ
+- 適切なMarkdownフォーマットを使用
 
 ---
 
-## 💡 Feature Requests
+## 🏗️ アーキテクチャ
 
-We welcome feature requests! Please:
-
-1. Check if already requested
-2. Clearly describe the feature
-3. Explain the use case
-4. Provide examples if possible
-
-**Template:**
-
-```markdown
-## Feature Request
-
-**Feature Description:**
-Clear description of the proposed feature
-
-**Use Case:**
-Why is this feature needed?
-
-**Proposed Implementation:**
-Ideas for how it could be implemented (optional)
-
-**Alternatives Considered:**
-Other approaches you've thought about
-```
-
----
-
-## 📚 Documentation
-
-### Areas to Document
-
-- User-facing features in README.md
-- Technical details in code comments
-- Development process in docs/
-- Testing procedures in TESTING-GUIDE.md
-- API changes in CHANGELOG.md
-
-### Documentation Style
-
-- Use clear, concise language
-- Provide examples
-- Include troubleshooting tips
-- Keep line length reasonable
-- Use proper markdown formatting
-
----
-
-## 🏗️ Architecture
-
-### Plugin Structure
+### プラグイン構造
 
 ```
 cctmx-teams/
-├── .claude-plugin/     # Plugin manifest
-├── skills/             # Skill definitions
-├── commands/           # Command definitions
-├── hooks/              # Hook configurations and scripts
-├── templates/          # Template files
-├── tests/              # Test scripts
-└── docs/               # Documentation
+├── .claude-plugin/     # プラグインマニフェスト
+├── skills/             # スキル定義
+├── commands/           # コマンド定義
+├── hooks/              # フック設定とスクリプト
+├── templates/          # テンプレートファイル
+├── tests/              # テストスクリプト
+└── docs/               # ドキュメント
 ```
 
-### Key Concepts
+### 主要な概念
 
-1. **Leader-Worker Pattern**: Clear separation of roles
-2. **Portability**: Use `${CLAUDE_PLUGIN_ROOT}` for paths
-3. **Error Handling**: Graceful degradation
-4. **Security**: No hardcoded credentials, safe command execution
-5. **Testability**: Comprehensive automated tests
+1. **リーダー・ワーカーパターン**: 役割の明確な分離
+2. **ポータビリティ**: パスには`${CLAUDE_PLUGIN_ROOT}`を使用
+3. **エラーハンドリング**: グレースフルデグラデーション
+4. **セキュリティ**: ハードコードされた認証情報なし、安全なコマンド実行
+5. **テスタビリティ**: 包括的な自動テスト
 
 ---
 
-## 📞 Communication
+## 📞 コミュニケーション
 
 - **Issues**: [GitHub Issues](https://github.com/IsodaZen/cctmx-teams/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/IsodaZen/cctmx-teams/discussions)
-- **Security**: Report security issues privately to the maintainer
+- **セキュリティ**: セキュリティ問題はメンテナーに非公開で報告してください
 
 ---
 
-## 📜 License
+## 📜 ライセンス
 
-By contributing to cctmx-teams, you agree that your contributions will be licensed under the MIT License.
-
----
-
-## 🙏 Thank You
-
-Thank you for contributing to cctmx-teams! Your contributions help make tmux-based Claude Code development more efficient for everyone.
+cctmx-teamsに貢献する場合、あなたの貢献はMITライセンスの下でライセンスされることに同意したものとみなされます。
 
 ---
 
-**Questions?** Open an issue or start a discussion on GitHub.
+## 🙏 謝辞
+
+cctmx-teamsへの貢献をありがとうございます！あなたの貢献は、tmuxベースのClaude Code開発をより効率的にするのに役立ちます。
+
+---
+
+**ご質問はありますか？** GitHubでIssueを開くか、ディスカッションを開始してください。
