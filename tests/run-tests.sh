@@ -322,6 +322,52 @@ fi
 
 log ""
 
+# Test 11: README.md 必須セクションの確認
+log "Test 11: README.md 必須セクションの確認"
+log "----------------------------------------"
+
+readme_section_errors=0
+
+# 要件 8.2: 前提条件にバージョン記載
+if grep -q "tmux.*3" "${PLUGIN_DIR}/README.md" && grep -q "bash.*4" "${PLUGIN_DIR}/README.md"; then
+  : # バージョン記載あり
+else
+  log_fail "前提条件にtmux/bashのバージョン要件が記載されていない (8.2)"
+  readme_section_errors=$((readme_section_errors + 1))
+fi
+
+# 要件 8.5: アンインストール手順
+if grep -qi "アンインストール" "${PLUGIN_DIR}/README.md"; then
+  : # アンインストールセクションあり
+else
+  log_fail "アンインストール手順が記載されていない (8.5)"
+  readme_section_errors=$((readme_section_errors + 1))
+fi
+
+# 要件 8.6: FAQ
+if grep -qi "FAQ\|よくある質問" "${PLUGIN_DIR}/README.md"; then
+  : # FAQセクションあり
+else
+  log_fail "FAQセクションが記載されていない (8.6)"
+  readme_section_errors=$((readme_section_errors + 1))
+fi
+
+# 要件 8.7: 設定ファイル詳細
+if grep -q "worker-info" "${PLUGIN_DIR}/README.md" && grep -q "task-counter" "${PLUGIN_DIR}/README.md"; then
+  : # 設定ファイル詳細あり
+else
+  log_fail "設定ファイルの詳細説明が記載されていない (8.7)"
+  readme_section_errors=$((readme_section_errors + 1))
+fi
+
+if [ $readme_section_errors -eq 0 ]; then
+  log_pass "README.md にすべての必須セクションが存在"
+else
+  log_fail "README.md に不足セクションが ${readme_section_errors} 件"
+fi
+
+log ""
+
 # テスト結果サマリー
 log "================================================"
 log "テスト結果サマリー"
