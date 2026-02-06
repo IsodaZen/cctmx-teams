@@ -1,84 +1,147 @@
 # Requirements Document
 
-## Introduction
+## Project Description (Input)
 
-cctmx-teamsプラグインのPhase 1（プラグイン化）における要件定義。tmuxベースのリーダー・ワーカーパターンを、再利用可能なClaude Codeプラグインとして実装する。
+### 目的
+
+cctmx-teams全体をClaude Codeプラグインとしてパッケージ化し、ユーザーが簡単にインストールして使用できるようにする。
+
+### 背景
+
+cctmx-teamsは、tmux環境でClaude Codeを複数起動し、リーダー・ワーカーパターンで効率的に開発するためのツール群を提供している。現在は個別のスキル・コマンド・フックとして実装されているが、これらを統合されたプラグインとしてパッケージ化することで、配布とインストールを容易にする。
+
+### 含める機能の範囲
+
+以下の全機能をプラグインに含める：
+
+- **スキル（4つ）**: tmux-worker, tmux-send, tmux-review, tmux-check
+- **コマンド**: setup等の全コマンド
+- **フック**: SessionStartフック
+- **テンプレート**: cctmx-team.mdテンプレート
+
+### 配布方法
+
+GitHubの公開リポジトリとして配布し、ユーザーがClone、またはダウンロードして利用できるようにする。
+
+### 成功基準
+
+- Claude Codeのプラグイン仕様に準拠したパッケージ構造
+- 全機能が正常に動作すること
+- インストール手順が明確で、簡単に導入できること
+- 既存のテストが全てパスすること
 
 ## Requirements
 
-### Requirement 1: プラグイン構造の作成
+### 要件 1: プラグイン構造の準拠
 
-**Objective:** 開発者として、tmuxベース多重起動の仕組みを標準的なClaude Codeプラグインとして実装したい。他のプロジェクトでも再利用可能にするために。
+**目的:** プラグイン開発者として、Claude Codeプラグイン仕様に準拠した構造を持つことで、プラグインが正しく認識され動作することを保証したい
 
-#### Acceptance Criteria
+#### 受入基準
 
-1. `.claude-plugin/plugin.json` マニフェストが存在し、name, version, description, author, license, repository, keywords を含むこと
-2. Skills, Commands, Hooks, Templates の各ディレクトリが正しい構造で配置されていること
-3. `README.md`, `LICENSE`（MIT）, `.gitignore` が含まれていること
-4. プラグインバージョンは `0.1.0` であること
+1. プラグインルートの`plugin.json`にプラグインメタデータ（name, version, description, author, license, repository, keywords）を記載すること
+2. `skills/`ディレクトリに全てのスキル定義（tmux-worker, tmux-send, tmux-review, tmux-check）を配置すること
+3. `commands/`ディレクトリに全てのコマンド定義を配置すること
+4. `hooks/`ディレクトリに全てのフック定義を配置すること
+5. `templates/`ディレクトリに全てのテンプレートファイルを配置すること
 
-### Requirement 2: ポータブルパスの実装
+### 要件 2: スキルの提供
 
-**Objective:** 開発者として、プラグインが任意のプロジェクトで動作するようにしたい。環境に依存しないインストールを可能にするために。
+**目的:** リーダーとして、tmux環境でリーダー・ワーカーパターンを実現するための4つのスキルを使用できることで、効率的なチーム開発ワークフローを実行したい
 
-#### Acceptance Criteria
+#### 受入基準
 
-1. 全てのスキル・フックスクリプトが `${CLAUDE_PLUGIN_ROOT}` を使用してプラグインルートを参照すること
-2. ハードコードされたパスが一切存在しないこと
-3. scratchpadパスは `${SCRATCHPAD_DIR}` 経由でアクセスすること
-4. プロジェクト固有データは `${CLAUDE_PROJECT_DIR}/.claude/` 配下に保存すること
+1. When リーダーペインで`/tmux-worker`が実行される、新しいワーカーペインを作成し、`.claude/worker-info`ファイルにワーカーペイン情報（セッション名、ペイン番号）を保存すること
+2. When リーダーペインで`/tmux-send`が実行され標準入力から構造化指示を受け取る、`TASK-YYYYMMDD-XXX`形式のタスクIDを生成し、指示をワーカーペインに送信し、タスクIDを出力すること
+3. If `.claude/worker-info`ファイルが存在しない場合に`/tmux-send`、`/tmux-review`、`/tmux-check`が実行される、エラーメッセージを表示し、`/tmux-worker`の実行を促すこと
+4. When リーダーペインで`/tmux-review`が実行される、ワーカーペインの出力を過去3000行キャプチャし、レビューチェックリストとともに表示すること
+5. When リーダーペインで`/tmux-check`が実行される、ワーカーペインの出力からエラーパターン（`Error:`, `エラー`, `失敗`, `Exception`, `Fatal`）を検索し、検出結果（エラーの有無と詳細）を表示すること
+6. 各スキルを`SKILL.md`（スキル定義）と`scripts/`ディレクトリ配下のスクリプトファイルで構成すること
 
-### Requirement 3: 基本Skills（3つ）の実装
+### 要件 3: コマンドの提供
 
-**Objective:** 開発者として、3つのスキル（tmux-worker, tmux-review, tmux-check）をプラグイン形式で実装したい。ポータブルなスキルとして提供するために。
+**目的:** ユーザーとして、セットアップコマンドを使用できることで、プラグインの初期設定を簡単に実行したい
 
-#### Acceptance Criteria
+#### 受入基準
 
-1. `tmux-worker`: ワーカーペイン作成機能が動作し、`${CLAUDE_PLUGIN_ROOT}` パスを使用すること
-2. `tmux-review`: ワーカー出力キャプチャとレビュー機能が動作し、scratchpadパスが `${SCRATCHPAD_DIR}` を使用すること
-3. `tmux-check`: エラーパターン検索とタイムアウト検知が動作すること
-4. 全スクリプトに実行権限（755）が付与されていること
-5. 全スクリプトがshellcheck警告ゼロであること
+1. When `/setup`コマンドが実行される、`.claude/rules/`ディレクトリを作成し、`templates/cctmx-team.md`を`.claude/rules/cctmx-team.md`にコピーすること
+2. If `.claude/rules/cctmx-team.md`が既に存在する場合に`/setup`コマンドが実行される、上書き確認を行い、ユーザーの承認後にファイルを上書きすること
+3. When `/setup`コマンドが正常に完了する、完了メッセージと次のステップ（tmuxセッション内でのClaude Code起動推奨、使用可能なスキル一覧）を表示すること
+4. setupコマンド定義を`commands/setup.md`に配置し、コマンド名、説明、許可ツール、引数ヒントを含むこと
 
-### Requirement 4: 新規tmux-sendスキルの実装
+### 要件 4: フックの提供
 
-**Objective:** リーダーAIとして、ワーカーAIに構造化指示を送信したい。明確なフォーマットでタスクを委譲するために。
+**目的:** ユーザーとして、セッション開始時に自動的に環境判定が行われることで、手動設定なしでリーダー/ワーカーの役割が割り当てられることを期待する
 
-#### Acceptance Criteria
+#### 受入基準
 
-1. タスクIDが `TASK-YYYYMMDD-XXX` 形式で自動生成されること
-2. カウンターファイル（`.claude/.task-counter-YYYYMMDD`）で日付ベースの採番を管理すること
-3. 標準入力から指示内容を読み込み、tmux send-keysでワーカーペインに送信すること
-4. ワーカーペイン情報（`.claude/worker-info`）が存在しない場合はエラーメッセージを表示すること
+1. When Claude Codeセッションが開始される、SessionStartフックを実行すること
+2. SessionStartフックがtmux環境を自動判定し、環境変数（`CLAUDE_ROLE`等）を設定すること
+3. When tmux環境でSessionStartフックが実行される、初期ペイン（右側）を`CLAUDE_ROLE=leader`として設定し、追加のペイン（左側）を`CLAUDE_ROLE=worker`として設定すること
+4. If tmux環境外でSessionStartフックが実行される、警告メッセージを表示し、tmuxセッション名を提案し、エラーではなく正常終了すること
+5. フック定義を`hooks/`ディレクトリに配置すること
 
-### Requirement 5: setupコマンドの実装
+### 要件 5: テンプレートの提供
 
-**Objective:** 開発者として、プラグインを簡単にプロジェクトに導入したい。ワンコマンドでセットアップを完了するために。
+**目的:** ユーザーとして、チーム開発用のテンプレートを使用できることで、統一されたワークフローを開始できるようにしたい
 
-#### Acceptance Criteria
+#### 受入基準
 
-1. tmux環境外で実行された場合はエラーメッセージを表示すること
-2. `templates/cctmx-team.md` を `.claude/rules/cctmx-team.md` にコピーすること
-3. 環境変数（CLAUDE_ROLE等）の設定状態を確認・表示すること
-4. セットアップ完了後、次のステップを案内すること
+1. `cctmx-team.md`テンプレートを提供すること
+2. テンプレートを`templates/`ディレクトリに配置すること
+3. テンプレートにリーダー・ワーカーパターンの使用方法を説明すること
+4. テンプレートにリーダーとワーカーのそれぞれの役割（リーダー：タスク分解・委譲・レビュー、ワーカー：実装）を明確に提示すること
+5. テンプレートにAIが強く認識する形式（見出し、箇条書き、強調表示）で禁止事項（ユーザーが直接ワーカーに指示、指示系統の崩壊につながる行動）を整理すること
 
-### Requirement 6: SessionStart Hookの実装
+### 要件 6: ポータビリティの保証
 
-**Objective:** 開発者として、Claude Code起動時にtmux環境を自動判定したい。手動設定なしでリーダー・ワーカーの役割を自動設定するために。
+**目的:** プラグイン開発者として、全てのスクリプトがポータブルなパス参照を使用することで、異なる環境でも正しく動作することを保証したい
 
-#### Acceptance Criteria
+#### 受入基準
 
-1. tmux環境を検出し、CLAUDE_ROLE, CLAUDE_TMUX_SESSION, CLAUDE_TMUX_PANE を設定すること
-2. リーダーペインの場合、ワーカーペインを自動作成すること
-3. スクリプトパスが `${CLAUDE_PLUGIN_ROOT}` を使用すること
-4. hookのタイムアウトが10秒以内であること
+1. 全スクリプトで`${CLAUDE_PLUGIN_ROOT}`を基準としたパス参照を使用すること
+2. 全スクリプトにハードコードされたパスを含めないこと
+3. 全スクリプトで`${CLAUDE_PROJECT_DIR}`を使用してプロジェクトルートを参照すること
 
-### Requirement 7: テンプレートの作成
+### 要件 7: 品質保証とテスト
 
-**Objective:** 開発者として、リーダー・ワーカーパターンの完全なガイドをプロジェクトに展開したい。setupコマンドで自動配置されるようにするために。
+**目的:** プラグイン開発者として、既存のテストが全てパスすることで、プラグイン化による品質劣化がないことを確認したい
 
-#### Acceptance Criteria
+#### 受入基準
 
-1. `templates/cctmx-team.md` にリーダー・ワーカーパターンのガイドが含まれていること
-2. タイトルが適切に変更されていること
-3. 未実装機能（Phase 2以降）の記述が削除されていること
+1. When `bash tests/run-tests.sh`を実行する、全テストにパスすること
+2. 構造テスト（ディレクトリ・ファイル存在確認）にパスすること
+3. JSON検証テスト（plugin.json等）にパスすること
+4. 権限テスト（スクリプト実行権限）にパスすること
+5. 構文テスト（bashシェル構文チェック）にパスすること
+6. If shellcheckが利用可能な場合、shellcheckテストにパスすること
+7. ポータビリティテスト（ハードコードパス検出）にパスすること
+
+### 要件 8: インストールとドキュメント
+
+**目的:** ユーザーとして、明確なインストール手順とドキュメントがあることで、簡単にプラグインを導入し使い始めることができるようにしたい
+
+#### 受入基準
+
+1. `README.md`にインストール手順（GitHubリポジトリからのクローン、Claude Codeへのプラグイン登録、`/setup`コマンドの実行）を含むこと
+2. `README.md`に前提条件（tmux 3.x+, bash 4.x+, Claude Code）を明記すること
+3. `README.md`に各スキル（tmux-worker, tmux-send, tmux-review, tmux-check）の概要と基本的な使用方法を説明すること
+4. `README.md`にトラブルシューティングセクションを含み、よくある問題（tmux環境外での実行、ワーカーペイン情報の欠如、SessionStart Hook未実行）と解決方法を記載すること
+5. `README.md`にアンインストール手順（`.claude/rules/cctmx-team.md`の削除、`.claude/worker-info`の削除、プラグインディレクトリの削除）を記載すること
+6. `README.md`または別ドキュメントにFAQ（よくある質問）セクションを含み、リーダー・ワーカーパターンの説明、複数ワーカーの制限、タスクID形式の意味を説明すること
+7. `README.md`または別ドキュメントに設定ファイルの詳細説明（`.claude/worker-info`, `.claude/.task-counter-YYYYMMDD`の役割と形式）を含むこと
+8. `LICENSE`ファイル（MIT）を含むこと
+9. 各スキルの`SKILL.md`に使用タイミング、動作説明、前提条件、トラブルシューティングを含むこと
+
+### 要件 9: バージョン管理とリリース
+
+**目的:** プラグイン開発者として、適切なバージョン管理とリリースプロセスがあることで、ユーザーに安定したプラグインを提供したい
+
+#### 受入基準
+
+1. `plugin.json`にセマンティックバージョニング（SemVer）形式のバージョン番号（`MAJOR.MINOR.PATCH`、例: `0.1.0`）を記載すること
+2. GitHubリポジトリで公開し、リポジトリURLを`plugin.json`の`repository`フィールドに記載すること
+3. `CHANGELOG.md`を含み、各バージョンの変更履歴（追加機能、修正、破壊的変更）を記載すること
+4. When 新しいバージョンをリリースする、`plugin.json`のバージョン番号更新、`CHANGELOG.md`への変更履歴追加、`vX.Y.Z`形式のGitタグ作成を含むこと
+5. `CHANGELOG.md`に各バージョンごとの日付、変更種別（Added, Changed, Fixed, Removed）を明記すること
+6. `main`ブランチを安定版として管理し、開発中の変更を`feature/`または`fix/`プレフィックス付きブランチで行うこと
+7. When バージョン0.x.yから1.0.0にアップグレードする、`CHANGELOG.md`に安定版リリースであることを明記し、APIの安定性を保証すること
