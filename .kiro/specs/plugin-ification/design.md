@@ -94,6 +94,7 @@ graph TB
 | Plugin Host | Claude Code | プラグインの読み込み・実行 | 環境変数の自動設定 |
 | Quality Tool | shellcheck | 静的解析 | 全警告解消 |
 | Quality Tool | jq | JSON検証 | plugin.json等のバリデーション |
+| Quality Tool | markdownlint | Markdownフォーマット統一 | MD024:off, MD041:off, MD033:br/details/summary許可 |
 
 ## System Flows
 
