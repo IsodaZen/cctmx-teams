@@ -111,9 +111,32 @@ claude
 
 - **`/cctmx-teams:setup`**: プラグインのセットアップ
 
+## 開発ワークフロー
+
+本プロジェクトでは [cc-sdd](https://github.com/gotalab/cc-sdd)（仕様駆動開発）を採用しています。
+
+新機能の開発フロー:
+
+```
+/kiro:steering              # プロジェクトコンテキストの確認
+/kiro:spec-init <機能名>    # 仕様の初期化
+/kiro:spec-requirements     # 要件定義
+/kiro:spec-design           # 技術設計
+/kiro:spec-tasks            # タスク分解
+/kiro:spec-impl             # 実装
+```
+
+仕様書は `.kiro/specs/<feature>/` 配下で管理されます。
+
 ## 詳細ドキュメント
 
-プロジェクトに導入後、`.claude/rules/cctmx-team.md` に完全なガイドが生成されます。
+| ドキュメント | 場所 |
+|------------|------|
+| リーダー・ワーカーガイド | 導入後 `.claude/rules/cctmx-team.md` に配置 |
+| テストガイド | `docs/TESTING-GUIDE.md` |
+| 機能仕様 | `.kiro/specs/` 配下 |
+| プロジェクトメモリ | `.kiro/steering/` 配下 |
+| 開発履歴アーカイブ | `docs/archive/` |
 
 ## トラブルシューティング
 
