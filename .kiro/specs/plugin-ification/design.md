@@ -2,15 +2,15 @@
 
 ## Overview
 
-**Purpose**: 既存のプロジェクト固有tmux多重起動実装を、再利用可能なClaude Codeプラグイン `cctmx-teams` v0.1.0 に変換する。
+**Purpose**: tmuxベースのリーダー・ワーカーパターンを、再利用可能なClaude Codeプラグイン `cctmx-teams` v0.1.0 として実装する。
 
 **Users**: Claude Codeでtmuxベースの並列AI開発を行いたい開発者。
 
-**Impact**: プロジェクト固有の実装から汎用プラグインへの変換により、任意のプロジェクトで即座にリーダー・ワーカーパターンを利用可能にする。
+**Impact**: 汎用プラグインとして実装することで、任意のプロジェクトで即座にリーダー・ワーカーパターンを利用可能にする。
 
 ### Goals
 
-- 既存の3スキル（tmux-worker, tmux-review, tmux-check）をポータブル化して移行
+- 3つの基本スキル（tmux-worker, tmux-review, tmux-check）をポータブルに実装
 - 新規スキル（tmux-send）でタスク委譲機能を追加
 - setupコマンドでワンステップ導入を実現
 - SessionStart Hookで自動環境判定を維持
@@ -78,7 +78,7 @@ graph TB
 **Architecture Integration**:
 - **Selected pattern**: Claude Codeプラグイン標準構造（Skills + Hooks + Commands + Templates）
 - **Domain boundaries**: プラグインコード（読み取り専用）とプロジェクトデータ（読み書き可能）を明確に分離
-- **Existing patterns preserved**: tmuxのsend-keys/capture-paneによるプロセス間通信
+- **Adopted patterns**: tmuxのsend-keys/capture-paneによるプロセス間通信
 - **New components rationale**: tmux-sendは構造化指示送信の自動化に必要、setupコマンドは導入体験の簡素化に必要
 
 ### Technology Stack
@@ -142,11 +142,11 @@ sequenceDiagram
 |-------------|---------|------------|-------|
 | 1 | プラグイン構造 | plugin.json, ディレクトリ構成 | - |
 | 2 | ポータブルパス | 全スクリプト | - |
-| 3 | 既存Skills移行 | tmux-worker, tmux-review, tmux-check | - |
+| 3 | 基本Skills実装 | tmux-worker, tmux-review, tmux-check | - |
 | 4 | tmux-send新規実装 | tmux-send/send-instruction.sh | タスク送信フロー |
 | 5 | setupコマンド | commands/setup.md | - |
-| 6 | SessionStart Hook移行 | hooks/session-start.sh | SessionStart フロー |
-| 7 | テンプレート移行 | templates/cctmx-team.md | - |
+| 6 | SessionStart Hook実装 | hooks/session-start.sh | SessionStart フロー |
+| 7 | テンプレート作成 | templates/cctmx-team.md | - |
 
 ## Components and Interfaces
 
@@ -189,7 +189,7 @@ sequenceDiagram
 
 ### Hooks Layer
 
-#### session-start.sh (移行)
+#### session-start.sh
 
 | Field | Detail |
 |-------|--------|

@@ -2,13 +2,13 @@
 
 ## Introduction
 
-cctmx-teamsプラグインのPhase 1（プラグイン化）における要件定義。プロジェクト固有の実装として存在していたtmuxベースのリーダー・ワーカーパターンを、再利用可能なClaude Codeプラグインに変換する。
+cctmx-teamsプラグインのPhase 1（プラグイン化）における要件定義。tmuxベースのリーダー・ワーカーパターンを、再利用可能なClaude Codeプラグインとして実装する。
 
 ## Requirements
 
 ### Requirement 1: プラグイン構造の作成
 
-**Objective:** 開発者として、既存のtmuxベース多重起動実装を標準的なClaude Codeプラグインに変換したい。他のプロジェクトでも再利用可能にするために。
+**Objective:** 開発者として、tmuxベース多重起動の仕組みを標準的なClaude Codeプラグインとして実装したい。他のプロジェクトでも再利用可能にするために。
 
 #### Acceptance Criteria
 
@@ -28,9 +28,9 @@ cctmx-teamsプラグインのPhase 1（プラグイン化）における要件�
 3. scratchpadパスは `${SCRATCHPAD_DIR}` 経由でアクセスすること
 4. プロジェクト固有データは `${CLAUDE_PROJECT_DIR}/.claude/` 配下に保存すること
 
-### Requirement 3: 既存Skills（3つ）の移行
+### Requirement 3: 基本Skills（3つ）の実装
 
-**Objective:** 開発者として、既存の3つのスキル（tmux-worker, tmux-review, tmux-check）をプラグイン形式に移行したい。機能を維持しながらポータブル化するために。
+**Objective:** 開発者として、3つのスキル（tmux-worker, tmux-review, tmux-check）をプラグイン形式で実装したい。ポータブルなスキルとして提供するために。
 
 #### Acceptance Criteria
 
@@ -62,7 +62,7 @@ cctmx-teamsプラグインのPhase 1（プラグイン化）における要件�
 3. 環境変数（CLAUDE_ROLE等）の設定状態を確認・表示すること
 4. セットアップ完了後、次のステップを案内すること
 
-### Requirement 6: SessionStart Hookの移行
+### Requirement 6: SessionStart Hookの実装
 
 **Objective:** 開発者として、Claude Code起動時にtmux環境を自動判定したい。手動設定なしでリーダー・ワーカーの役割を自動設定するために。
 
@@ -73,12 +73,12 @@ cctmx-teamsプラグインのPhase 1（プラグイン化）における要件�
 3. スクリプトパスが `${CLAUDE_PLUGIN_ROOT}` を使用すること
 4. hookのタイムアウトが10秒以内であること
 
-### Requirement 7: テンプレートの移行
+### Requirement 7: テンプレートの作成
 
 **Objective:** 開発者として、リーダー・ワーカーパターンの完全なガイドをプロジェクトに展開したい。setupコマンドで自動配置されるようにするために。
 
 #### Acceptance Criteria
 
-1. `templates/cctmx-team.md` に移行元（CLAUDE.local.md）の内容が含まれていること
+1. `templates/cctmx-team.md` にリーダー・ワーカーパターンのガイドが含まれていること
 2. タイトルが適切に変更されていること
 3. 未実装機能（Phase 2以降）の記述が削除されていること

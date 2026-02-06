@@ -13,16 +13,16 @@
   - `.gitignore` 作成
   - _Requirements: 1_
 
-- [x] 2. 既存Skillsの移行とポータブル化
-- [x] 2.1 tmux-worker の移行
+- [x] 2. 基本Skillsの実装とポータブル化
+- [x] 2.1 tmux-worker の実装
   - SKILL.md: スクリプトパスを `${CLAUDE_PLUGIN_ROOT}` に変更
   - create-worker.sh: 実行権限付与（755）
   - _Requirements: 2, 3_
-- [x] 2.2 tmux-review の移行
+- [x] 2.2 tmux-review の実装
   - SKILL.md: スクリプトパスを `${CLAUDE_PLUGIN_ROOT}` に変更
   - review-worker.sh: scratchpadパスを `${SCRATCHPAD_DIR}` に変更、実行権限付与（755）
   - _Requirements: 2, 3_
-- [x] 2.3 tmux-check の移行
+- [x] 2.3 tmux-check の実装
   - SKILL.md: スクリプトパスを `${CLAUDE_PLUGIN_ROOT}` に変更
   - check-errors.sh: 実行権限付与（755）
   - _Requirements: 2, 3_
@@ -37,13 +37,13 @@
   - commands/setup.md: tmux環境チェック、テンプレートコピー、環境変数確認、完了メッセージ
   - _Requirements: 5_
 
-- [x] 5. SessionStart Hookの移行
+- [x] 5. SessionStart Hookの実装
   - hooks/hooks.json: Hook定義（matcher: *, timeout: 10）
-  - hooks/scripts/session-start.sh: パスのポータブル化、ファイル名変更
+  - hooks/scripts/session-start.sh: ポータブルパスで実装
   - _Requirements: 6_
 
-- [x] 6. テンプレートの移行
-  - templates/cctmx-team.md: CLAUDE.local.mdから内容移行、未実装機能の記述削除
+- [x] 6. テンプレートの作成
+  - templates/cctmx-team.md: リーダー・ワーカーパターンガイドを作成
   - _Requirements: 7_
 
 - [x] 7. 品質チェックと修正

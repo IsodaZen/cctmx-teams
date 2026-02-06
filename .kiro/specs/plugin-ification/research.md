@@ -8,17 +8,17 @@
 ## Summary
 
 - **Feature**: `plugin-ification`
-- **Discovery Scope**: Complex Integration（既存実装のプラグイン変換）
+- **Discovery Scope**: New Feature（Claude Codeプラグインとしての新規実装）
 - **Key Findings**:
   - Claude Codeプラグインは `.claude-plugin/plugin.json` をマニフェストとする標準構造を持つ
   - `${CLAUDE_PLUGIN_ROOT}` 変数でポータブルなパス参照が可能
-  - 既存実装はプロジェクト固有パスがハードコードされており、移行にはパスの全面的な書き換えが必要
+  - 全スクリプトで環境変数ベースのパス参照を徹底する必要がある
 
 ## Research Log
 
 ### Claude Codeプラグイン仕様の調査
 
-- **Context**: 既存のプロジェクト固有実装を汎用プラグインに変換するための仕様調査
+- **Context**: tmuxベースのリーダー・ワーカーパターンをClaude Codeプラグインとして実装するための仕様調査
 - **Sources Consulted**:
   - [Claude Code Plugin Development](https://docs.claude.ai/code/plugins)
   - [plugin-dev Plugin](https://github.com/anthropics/claude-code-plugins/tree/main/plugin-dev)
@@ -27,22 +27,23 @@
   - `plugin.json` にメタデータ（name, version, description, author, license等）を定義
   - スクリプトパスは `${CLAUDE_PLUGIN_ROOT}` で参照可能
   - Hookは `hooks.json` で定義し、SessionStart等のイベントに紐づけ
-- **Implications**: 既存の4スキル + 1フックの構成はプラグイン仕様に直接マッピング可能
+- **Implications**: 4スキル + 1フックの構成はプラグイン仕様に直接マッピング可能
 
-### 既存実装のパス依存性調査
+### パス設計の調査
 
-- **Context**: 既存スクリプトのハードコードパスの洗い出し
-- **Sources Consulted**: 既存ソースコード（smart-address-book リポジトリ）
+- **Context**: プラグインスクリプトで使用するパス参照方式の調査
+- **Sources Consulted**: Claude Code Plugin公式ドキュメント
 - **Findings**:
-  - `review-worker.sh`: scratchpadパスが `/private/tmp/claude-1689378477/...` にハードコード
-  - 全スキルの SKILL.md: `${CLAUDE_PROJECT_DIR}/.claude/skills/` を参照
-  - worker-info ファイル: `${CLAUDE_PROJECT_DIR}/.claude/worker-info` に保存（これはプロジェクト固有情報のため変更不要）
-- **Implications**: scratchpadパスは `${SCRATCHPAD_DIR}`、スクリプトパスは `${CLAUDE_PLUGIN_ROOT}` に統一する必要あり
+  - プラグイン内スクリプトは `${CLAUDE_PLUGIN_ROOT}` で参照する
+  - 一時ファイルは `${SCRATCHPAD_DIR}` を使用する
+  - プロジェクト固有データは `${CLAUDE_PROJECT_DIR}/.claude/` 配下に保存する
+  - worker-info ファイル: `${CLAUDE_PROJECT_DIR}/.claude/worker-info` に保存（プロジェクト固有情報のため適切）
+- **Implications**: scratchpadパスは `${SCRATCHPAD_DIR}`、スクリプトパスは `${CLAUDE_PLUGIN_ROOT}` で統一する
 
 ### タスクID設計の検討
 
 - **Context**: tmux-sendスキルでのタスク追跡方式の設計
-- **Sources Consulted**: 既存の構造化指示フォーマット定義
+- **Sources Consulted**: 構造化指示フォーマットの設計検討
 - **Findings**:
   - `TASK-YYYYMMDD-XXX` 形式が明確で衝突しにくい
   - カウンターファイルは日付単位でリセットが自然
@@ -60,7 +61,7 @@
 
 ### Decision: パスのポータブル化方式
 
-- **Context**: 既存のハードコードパスをプラグイン環境で動作するように変更する必要がある
+- **Context**: プラグインスクリプトのパス参照方式を決定する必要がある
 - **Alternatives Considered**:
   1. 相対パス — スクリプトからの相対パスで参照
   2. 環境変数 — `${CLAUDE_PLUGIN_ROOT}` 等の環境変数で参照
