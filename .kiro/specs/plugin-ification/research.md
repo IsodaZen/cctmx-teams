@@ -120,6 +120,16 @@
 - **Trade-offs**: 設定エラーがサイレントに無視される可能性。警告メッセージで緩和。
 - **Follow-up**: デバッグログ（`/tmp/cctmx-teams-hook-session-start.log`）で問題追跡可能
 
+### Decision: 古いタスクカウンターファイルの自動削除
+
+- **Context**: `.task-counter-YYYYMMDD` ファイルが日付ごとに新規作成され、古いファイルが `.claude/` 配下に残留し続ける
+- **Alternatives Considered**:
+  1. 手動削除 — ユーザーが定期的にクリーンアップ
+  2. send-instruction.sh 実行時に当日以外のファイルを自動削除
+- **Selected Approach**: send-instruction.sh 実行時に自動削除
+- **Rationale**: ユーザーに管理負担をかけず、状態ファイルの肥大化を防止する。当日以外のカウンターは不要（日付リセット設計のため）
+- **Trade-offs**: 過去の採番情報が失われるが、タスクIDはワーカー出力に残るため問題なし
+
 ## Risks & Mitigations
 
 - tmux環境外での実行 — SessionStart Hookで検出し警告メッセージ表示、exit 0で続行

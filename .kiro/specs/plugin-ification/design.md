@@ -262,6 +262,7 @@ export CLAUDE_WORKER_SESSION=<session-name>
 - 標準入力からの指示内容読み込み（空の場合はエラー）
 - `tmux load-buffer` + `paste-buffer` による指示テキスト送信
 - `tmux send-keys Enter` による実行
+- 当日以外の古いカウンターファイル（`.task-counter-*`）の自動削除
 
 **Dependencies**
 - Inbound: Leader AI — 構造化指示テキスト（stdin）
@@ -272,6 +273,7 @@ export CLAUDE_WORKER_SESSION=<session-name>
 
 - **State model**: カウンターファイル `${CLAUDE_PROJECT_DIR}/.claude/.task-counter-YYYYMMDD`（整数テキスト1行）
 - **Persistence**: ファイルベース、日付単位でリセット（翌日は001から再開）
+- **Cleanup**: 実行時に当日以外の `.task-counter-*` ファイルを自動削除（肥大化防止）
 - **Concurrency**: 単一プロセスでの実行を前提（排他制御なし）
 
 **タスクID生成ルール**:
