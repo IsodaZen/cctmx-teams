@@ -120,6 +120,17 @@
 - **Trade-offs**: 設定エラーがサイレントに無視される可能性。警告メッセージで緩和。
 - **Follow-up**: デバッグログ（`/tmp/cctmx-teams-hook-session-start.log`）で問題追跡可能
 
+### Decision: setupコマンドによる導入先プロジェクトの.gitignore管理
+
+- **Context**: 状態ファイル（`worker-info`, `.task-counter-*`）はプラグイン導入先のプロジェクトに作成される。本リポジトリの `.gitignore` に追加しても導入先には影響しない
+- **Alternatives Considered**:
+  1. ユーザーに手動で `.gitignore` を編集させる
+  2. setupコマンドで導入先の `.gitignore` に自動追記する
+- **Selected Approach**: setupコマンドで自動追記（未登録パターンのみ）
+- **Rationale**: セットアップ時に一括で環境を整えることで、状態ファイルの誤コミットを防止。既存エントリとの重複チェックにより冪等性を確保
+- **Trade-offs**: `.gitignore` への自動書き込みはユーザーの意図しない変更になりうるが、setupコマンドは明示的に実行されるため許容範囲
+- **対象パターン**: `.claude/worker-info`, `.claude/.task-counter-*`
+
 ### Decision: 古いタスクカウンターファイルの自動削除
 
 - **Context**: `.task-counter-YYYYMMDD` ファイルが日付ごとに新規作成され、古いファイルが `.claude/` 配下に残留し続ける

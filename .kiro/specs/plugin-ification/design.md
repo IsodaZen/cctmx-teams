@@ -376,11 +376,15 @@ TASK-20260207-001  # 翌日は001からリセット
 - tmux内での実行確認
 - `templates/cctmx-team.md` を `${CLAUDE_PROJECT_DIR}/.claude/rules/cctmx-team.md` にコピー
 - 既存ファイルの上書き確認
+- 導入先プロジェクトの `.gitignore` に状態ファイルのパターンを追記（未登録の場合のみ）
+  - `.claude/worker-info`
+  - `.claude/.task-counter-*`
 - SessionStart Hook動作確認（`CLAUDE_ROLE` 環境変数チェック）
 - 完了メッセージと次のステップ表示
 
 **Dependencies**
 - External: templates/cctmx-team.md — コピー元テンプレート (P0)
+- External: `${CLAUDE_PROJECT_DIR}/.gitignore` — 状態ファイル除外設定 (P1)
 - Allowed tools: Bash, Read, Write
 
 ### Templates Layer
