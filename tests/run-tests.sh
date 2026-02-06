@@ -4,7 +4,7 @@ set -euo pipefail
 # cctmx-teams 自動テストスクリプト
 # このスクリプトは、tmux環境を必要としないテストを実行します
 
-PLUGIN_DIR="/Users/z-isoda/private/cctmx-teams"
+PLUGIN_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 TEST_RESULTS_DIR="${PLUGIN_DIR}/test-results"
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 REPORT_FILE="${TEST_RESULTS_DIR}/test-report-${TIMESTAMP}.txt"
@@ -30,14 +30,14 @@ log() {
 
 log_pass() {
   echo -e "${GREEN}✓ PASS${NC}: $1" | tee -a "$REPORT_FILE"
-  ((PASSED++))
-  ((TOTAL++))
+  PASSED=$((PASSED + 1))
+  TOTAL=$((TOTAL + 1))
 }
 
 log_fail() {
   echo -e "${RED}✗ FAIL${NC}: $1" | tee -a "$REPORT_FILE"
-  ((FAILED++))
-  ((TOTAL++))
+  FAILED=$((FAILED + 1))
+  TOTAL=$((TOTAL + 1))
 }
 
 log_info() {
@@ -120,9 +120,9 @@ script_count=0
 executable_count=0
 
 while IFS= read -r script; do
-  ((script_count++))
+  script_count=$((script_count + 1))
   if [ -x "$script" ]; then
-    ((executable_count++))
+    executable_count=$((executable_count + 1))
   else
     log_fail "実行権限なし: ${script}"
   fi
@@ -147,7 +147,7 @@ while IFS= read -r script; do
     : # 構文OK
   else
     log_fail "構文エラー: ${script}"
-    ((syntax_errors++))
+    syntax_errors=$((syntax_errors + 1))
   fi
 done < <(find "${PLUGIN_DIR}" -name "*.sh")
 
@@ -224,7 +224,7 @@ for skill_md in "${PLUGIN_DIR}"/skills/*/SKILL.md; do
     : # frontmatter 存在
   else
     log_fail "${skill_name}: frontmatter が存在しない"
-    ((skill_errors++))
+    skill_errors=$((skill_errors + 1))
     continue
   fi
 
@@ -233,7 +233,7 @@ for skill_md in "${PLUGIN_DIR}"/skills/*/SKILL.md; do
     : # name フィールド存在
   else
     log_fail "${skill_name}: name フィールドが存在しない"
-    ((skill_errors++))
+    skill_errors=$((skill_errors + 1))
   fi
 
   # description フィールドの確認
@@ -241,7 +241,7 @@ for skill_md in "${PLUGIN_DIR}"/skills/*/SKILL.md; do
     : # description フィールド存在
   else
     log_fail "${skill_name}: description フィールドが存在しない"
-    ((skill_errors++))
+    skill_errors=$((skill_errors + 1))
   fi
 done
 
@@ -266,7 +266,7 @@ for skill_md in "${PLUGIN_DIR}"/skills/*/SKILL.md; do
     : # ${CLAUDE_PLUGIN_ROOT} 使用
   else
     log_fail "${skill_name}: \${CLAUDE_PLUGIN_ROOT} を使用していない"
-    ((plugin_root_missing++))
+    plugin_root_missing=$((plugin_root_missing + 1))
   fi
 done
 
@@ -291,7 +291,7 @@ if [ -f "${PLUGIN_DIR}/hooks/hooks.json" ]; then
     fi
 
     # SessionStart の確認
-    if jq -e '.SessionStart' "${PLUGIN_DIR}/hooks/hooks.json" > /dev/null 2>&1; then
+    if jq -e '.hooks.SessionStart // .SessionStart' "${PLUGIN_DIR}/hooks/hooks.json" > /dev/null 2>&1; then
       log_pass "SessionStart フックが定義されている"
     else
       log_fail "SessionStart フックが定義されていない"
@@ -318,6 +318,52 @@ if [ -f "${PLUGIN_DIR}/README.md" ]; then
   fi
 else
   log_fail "README.md が存在しない"
+fi
+
+log ""
+
+# Test 11: README.md 必須セクションの確認
+log "Test 11: README.md 必須セクションの確認"
+log "----------------------------------------"
+
+readme_section_errors=0
+
+# 要件 8.2: 前提条件にバージョン記載
+if grep -q "tmux.*3" "${PLUGIN_DIR}/README.md" && grep -q "bash.*4" "${PLUGIN_DIR}/README.md"; then
+  : # バージョン記載あり
+else
+  log_fail "前提条件にtmux/bashのバージョン要件が記載されていない (8.2)"
+  readme_section_errors=$((readme_section_errors + 1))
+fi
+
+# 要件 8.5: アンインストール手順
+if grep -qi "アンインストール" "${PLUGIN_DIR}/README.md"; then
+  : # アンインストールセクションあり
+else
+  log_fail "アンインストール手順が記載されていない (8.5)"
+  readme_section_errors=$((readme_section_errors + 1))
+fi
+
+# 要件 8.6: FAQ
+if grep -qi "FAQ\|よくある質問" "${PLUGIN_DIR}/README.md"; then
+  : # FAQセクションあり
+else
+  log_fail "FAQセクションが記載されていない (8.6)"
+  readme_section_errors=$((readme_section_errors + 1))
+fi
+
+# 要件 8.7: 設定ファイル詳細
+if grep -q "worker-info" "${PLUGIN_DIR}/README.md" && grep -q "task-counter" "${PLUGIN_DIR}/README.md"; then
+  : # 設定ファイル詳細あり
+else
+  log_fail "設定ファイルの詳細説明が記載されていない (8.7)"
+  readme_section_errors=$((readme_section_errors + 1))
+fi
+
+if [ $readme_section_errors -eq 0 ]; then
+  log_pass "README.md にすべての必須セクションが存在"
+else
+  log_fail "README.md に不足セクションが ${readme_section_errors} 件"
 fi
 
 log ""

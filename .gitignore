@@ -4,6 +4,9 @@
 .claude/worker-info
 .claude/.task-counter-*
 
+# Test results
+test-results/
+
 # Logs
 *.log
 
