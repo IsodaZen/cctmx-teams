@@ -8,6 +8,5 @@
   },
   "license": "MIT",
   "repository": "https://github.com/IsodaZen/cctmx-teams",
-  "keywords": ["tmux", "team", "multi-instance", "workflow", "leader-worker"],
-  "hooks": "hooks/hooks.json"
+  "keywords": ["tmux", "team", "multi-instance", "workflow", "leader-worker"]
 }
