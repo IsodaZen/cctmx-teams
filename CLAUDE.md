@@ -25,16 +25,12 @@
 
 変更の規模に応じて、以下のプロセスを適用する。
 
-#### レベル1: 新機能開発（フルSDD）
+#### レベル1: 軽微な修正（最小SDD）
 
-対象: 新スキル追加、大きな機能変更、アーキテクチャ変更
+対象: typo修正、コメント修正、フォーマット調整
 
-1. `/kiro:spec-init` で仕様を初期化
-2. `/kiro:spec-requirements` で要件定義
-3. `/kiro:spec-design` で設計
-4. `/kiro:spec-tasks` でタスク分解
-5. `/kiro:spec-impl` で実装
-6. `.kiro/specs/<feature>/` 配下に全成果物を記録
+1. **目的の明確化**: 何を・なぜ変更するか、最低限の理由を明確にしてから着手
+2. **既存仕様の非破壊確認**: 変更が既存の仕様・設計に矛盾しないことを確認
 
 #### レベル2: 中規模修正（簡易SDD）
 
@@ -45,12 +41,16 @@
 3. **設計判断の記録**: なぜその実装方法を選んだかをコミットメッセージに記載
 4. **既存仕様との整合**: 関連する `.kiro/specs/` の仕様書がある場合は整合性を確認し、必要に応じて仕様書も更新
 
-#### レベル3: 軽微な修正（最小SDD）
+#### レベル3: 新機能開発（フルSDD）
 
-対象: typo修正、コメント修正、フォーマット調整
+対象: 新スキル追加、大きな機能変更、アーキテクチャ変更
 
-1. **目的の明確化**: 何を・なぜ変更するか、最低限の理由を明確にしてから着手
-2. **既存仕様の非破壊確認**: 変更が既存の仕様・設計に矛盾しないことを確認
+1. `/kiro:spec-init` で仕様を初期化
+2. `/kiro:spec-requirements` で要件定義
+3. `/kiro:spec-design` で設計
+4. `/kiro:spec-tasks` でタスク分解
+5. `/kiro:spec-impl` で実装
+6. `.kiro/specs/<feature>/` 配下に全成果物を記録
 
 ### 禁止事項
 
@@ -75,9 +75,9 @@
 
 - **仕様書**: `.kiro/specs/<feature>/` 配下（requirements.md, design.md, tasks.md, research.md）
 - **プロジェクトメモリ**: `.kiro/steering/`（product.md, structure.md, tech.md）
-- **新機能開発（レベル1）**: `/kiro:spec-init` → `/kiro:spec-requirements` → `/kiro:spec-design` → `/kiro:spec-tasks` → `/kiro:spec-impl` の順で実施
+- **軽微な修正（レベル1）**: 目的明確化 → 既存仕様の非破壊確認
 - **中規模修正（レベル2）**: 要求明文化 → 影響範囲確認 → 設計判断記録 → 仕様整合確認
-- **軽微な修正（レベル3）**: 目的明確化 → 既存仕様の非破壊確認
+- **新機能開発（レベル3）**: `/kiro:spec-init` → `/kiro:spec-requirements` → `/kiro:spec-design` → `/kiro:spec-tasks` → `/kiro:spec-impl` の順で実施
 
 ### プロジェクト構造
 
