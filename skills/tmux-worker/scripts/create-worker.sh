@@ -28,6 +28,16 @@ worker_pane="${window_number}.${worker_pane_index}"
 
 echo "📝 ワーカーペイン番号: ${worker_pane}" >&2
 
+# 重要: tmux split-windowは親ペインの環境変数を継承するため、
+# CLAUDE_ROLE=leader が継承されてしまう。
+# ClaudeCode起動前に継承された環境変数をクリアし、正しい値を設定する。
+echo "🔄 ワーカーペインの環境変数を設定中..." >&2
+tmux send-keys -t "${session}:${worker_pane}" "unset CLAUDE_ROLE CLAUDE_TMUX_PANE CLAUDE_TMUX_SESSION CLAUDE_WORKER_PANE" Enter
+sleep 0.3
+
+tmux send-keys -t "${session}:${worker_pane}" "export CLAUDE_ROLE=worker CLAUDE_TMUX_SESSION=${session} CLAUDE_TMUX_PANE=${worker_pane}" Enter
+sleep 0.3
+
 # ワーカーペインでプロジェクトディレクトリに移動
 tmux send-keys -t "${session}:${worker_pane}" "cd ${CLAUDE_PROJECT_DIR}" Enter
 
