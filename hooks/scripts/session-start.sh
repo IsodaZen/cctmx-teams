@@ -152,10 +152,14 @@ if [ "$pane_count" -eq 1 ]; then
   tmux select-pane -t "${tmux_session}:${tmux_pane}"
   log "リーダーペインにフォーカスを戻す"
 
-  printf '{"systemMessage": "✅ cctmx-teams: リーダーペインで起動しました\\n   Session: %s, Pane: %s\\n\\n✅ ワーカーペインを自動作成しました\\n   Pane: %s"}\n' "${tmux_session}" "${tmux_pane}" "${worker_pane_full}" >&2
+  printf '{"systemMessage": "✅ cctmx-teams: あなたは【リーダー】として起動しました。\\n\\n**重要: 以下の行動規範に従ってください。**\\n- あなたの役割は「指示・監視・レビュー・報告」です。実装作業は一切行わないでください。\\n- すべての実装はワーカーに委譲してください。\\n- 詳細は `.claude/rules/cctmx-team.md` を参照してください。\\n\\n   Session: %s, Pane: %s\\n\\n✅ ワーカーペインを自動作成しました\\n   Pane: %s"}\n' "${tmux_session}" "${tmux_pane}" "${worker_pane_full}" >&2
 else
   log "ペイン数が${pane_count}個のため、ワーカーペインの自動作成をスキップ"
-  printf '{"systemMessage": "✅ cctmx-teams: %sペインで起動しました\\n   Session: %s, Pane: %s, Role: %s\\n\\nℹ️ 既に%d個のペインが存在するため、ワーカーペインの自動作成をスキップしました"}\n' "${claude_role}" "${tmux_session}" "${tmux_pane}" "${claude_role}" "${pane_count}" >&2
+  if [ "$claude_role" = "leader" ]; then
+    printf '{"systemMessage": "✅ cctmx-teams: あなたは【リーダー】として起動しました。\\n\\n**重要: 以下の行動規範に従ってください。**\\n- あなたの役割は「指示・監視・レビュー・報告」です。実装作業は一切行わないでください。\\n- すべての実装はワーカーに委譲してください。\\n- 詳細は `.claude/rules/cctmx-team.md` を参照してください。\\n\\n   Session: %s, Pane: %s\\n\\nℹ️ 既に%d個のペインが存在するため、ワーカーペインの自動作成をスキップしました"}\n' "${tmux_session}" "${tmux_pane}" "${pane_count}" >&2
+  else
+    printf '{"systemMessage": "✅ cctmx-teams: あなたは【ワーカー】として起動しました。\\n\\n**重要: 以下の行動規範に従ってください。**\\n- あなたの役割は「リーダーの指示に忠実に従い、実装に専念する」ことです。\\n- 独自判断・管理業務・Git書き込み操作は一切行わないでください。\\n- 詳細は `.claude/rules/cctmx-team.md` を参照してください。\\n\\n   Session: %s, Pane: %s\\n\\nℹ️ 既に%d個のペインが存在するため、ワーカーペインの自動作成をスキップしました"}\n' "${tmux_session}" "${tmux_pane}" "${pane_count}" >&2
+  fi
 fi
 
 log "=== SessionStart Hook完了（tmux内部） ==="
