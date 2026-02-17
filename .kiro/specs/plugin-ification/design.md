@@ -251,8 +251,6 @@ export CLAUDE_WORKER_WINDOW=<window>
 export CLAUDE_WORKER_PANE=<pane>
 ```
 
-> **後方互換性**: `CLAUDE_WORKER_WINDOW`が未定義で`CLAUDE_WORKER_PANE`が`window.pane`形式（例: `0.1`）の場合は旧形式として処理。`CLAUDE_WORKER_PANE`がペイン番号のみの場合はウィンドウ0をフォールバックとして使用。
-
 #### send-instruction.sh
 
 | Field | Detail |

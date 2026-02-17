@@ -13,7 +13,7 @@ fi
 # shellcheck source=/dev/null
 source "$worker_info_file"
 
-if [ -z "${CLAUDE_WORKER_PANE:-}" ] || [ -z "${CLAUDE_WORKER_SESSION:-}" ]; then
+if [ -z "${CLAUDE_WORKER_SESSION:-}" ] || [ -z "${CLAUDE_WORKER_WINDOW:-}" ] || [ -z "${CLAUDE_WORKER_PANE:-}" ]; then
   echo "❌ エラー: ワーカーペイン情報が不正です" >&2
   echo "worker-infoの内容:" >&2
   cat "$worker_info_file" >&2
@@ -21,18 +21,7 @@ if [ -z "${CLAUDE_WORKER_PANE:-}" ] || [ -z "${CLAUDE_WORKER_SESSION:-}" ]; then
 fi
 
 session="${CLAUDE_WORKER_SESSION}"
-
-# tmuxターゲットを構築（session:window.pane 形式）
-if [ -n "${CLAUDE_WORKER_WINDOW:-}" ]; then
-  # 新形式: SESSION, WINDOW, PANE が分離
-  tmux_target="${session}:${CLAUDE_WORKER_WINDOW}.${CLAUDE_WORKER_PANE}"
-elif [[ "${CLAUDE_WORKER_PANE}" == *.* ]]; then
-  # 旧形式互換: CLAUDE_WORKER_PANE が window.pane 形式（例: 0.1）
-  tmux_target="${session}:${CLAUDE_WORKER_PANE}"
-else
-  # フォールバック: PANE のみの場合はウィンドウ0を仮定
-  tmux_target="${session}:0.${CLAUDE_WORKER_PANE}"
-fi
+tmux_target="${session}:${CLAUDE_WORKER_WINDOW}.${CLAUDE_WORKER_PANE}"
 
 # .claudeディレクトリの作成（存在しない場合）
 mkdir -p "${CLAUDE_PROJECT_DIR}/.claude"
