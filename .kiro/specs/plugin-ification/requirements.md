@@ -50,7 +50,7 @@ GitHubの公開リポジトリとして配布し、ユーザーがClone、また
 
 #### 受入基準
 
-1. When リーダーペインで`/tmux-worker`が実行される、新しいワーカーペインを作成し、`.claude/worker-info`ファイルにワーカーペイン情報（セッション名、ペイン番号）を保存すること
+1. When リーダーペインで`/tmux-worker`が実行される、新しいワーカーペインを作成し、`.claude/worker-info`ファイルにワーカーペイン情報（セッション名、ウィンドウ番号、ペイン番号）を保存すること
 2. When リーダーペインで`/tmux-send`が実行され標準入力から構造化指示を受け取る、`TASK-YYYYMMDD-XXX`形式のタスクIDを生成し、指示をワーカーペインに送信し、タスクIDを出力すること
 3. If `.claude/worker-info`ファイルが存在しない場合に`/tmux-send`、`/tmux-review`、`/tmux-check`が実行される、エラーメッセージを表示し、`/tmux-worker`の実行を促すこと
 4. When リーダーペインで`/tmux-review`が実行される、ワーカーペインの出力を過去3000行キャプチャし、レビューチェックリストとともに表示すること
@@ -80,7 +80,7 @@ GitHubの公開リポジトリとして配布し、ユーザーがClone、また
 4. If tmux環境外でSessionStartフックが実行される、警告メッセージを表示し、tmuxセッション名を提案し、エラーではなく正常終了すること
 5. フック定義を`hooks/`ディレクトリに配置すること
 6. If `CLAUDE_ENV_FILE`が未定義または空文字列の場合にSessionStartフックが実行される、環境変数ファイルへの書き込みをスキップしつつ、tmux環境判定・ワーカーペイン作成・ワーカーペインへの環境変数直接設定を含むフック処理全体を継続すること（早期終了しないこと）
-7. When ワーカーペインを自動作成しClaude Codeを起動する、起動前にtmuxの親ペインから継承された環境変数（`CLAUDE_ROLE`, `CLAUDE_TMUX_PANE`, `CLAUDE_TMUX_SESSION`, `CLAUDE_WORKER_PANE`）をクリアし、ワーカーとしての正しい値（`CLAUDE_ROLE=worker`等）をシェル環境に設定すること
+7. When ワーカーペインを自動作成しClaude Codeを起動する、起動前にtmuxの親ペインから継承された環境変数（`CLAUDE_ROLE`, `CLAUDE_TMUX_PANE`, `CLAUDE_TMUX_SESSION`, `CLAUDE_WORKER_PANE`, `CLAUDE_WORKER_WINDOW`）をクリアし、ワーカーとしての正しい値（`CLAUDE_ROLE=worker`等）をシェル環境に設定すること。また、`.claude/worker-info`ファイルも生成すること
 8. SessionStartフックがペイン番号を取得する際、`TMUX_PANE`環境変数を使用してフック実行元ペインを正確に特定すること（`tmux display-message`のアクティブペイン依存を回避すること）
 9. When ワーカーペインでClaude Codeが起動される、ワーカーのClaude Codeインスタンスが`CLAUDE_ROLE=worker`として動作すること（リーダーペインの環境変数を継承して`CLAUDE_ROLE=leader`として動作しないこと）
 

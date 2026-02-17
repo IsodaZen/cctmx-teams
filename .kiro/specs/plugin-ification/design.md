@@ -121,7 +121,8 @@ sequenceDiagram
         alt ペイン数 = 1 かつ leader
             HS->>TM: split-window -h でワーカーペイン作成
             HS->>TM: send-keys でClaude起動
-            HS->>EF: CLAUDE_WORKER_PANE 追記
+            HS->>EF: CLAUDE_WORKER_SESSION/WINDOW/PANE 追記
+            Note over HS: worker-infoファイルも生成
         end
         HS-->>CC: exit 0
     else tmux環境なし
@@ -245,8 +246,9 @@ sequenceDiagram
 
 **worker-info フォーマット**:
 ```bash
-export CLAUDE_WORKER_PANE=<window>.<pane>
 export CLAUDE_WORKER_SESSION=<session-name>
+export CLAUDE_WORKER_WINDOW=<window>
+export CLAUDE_WORKER_PANE=<pane>
 ```
 
 #### send-instruction.sh
@@ -361,7 +363,9 @@ TASK-20260207-001  # 翌日は001からリセット
 | `CLAUDE_TMUX_SESSION` | セッション名 | tmux環境内 |
 | `CLAUDE_TMUX_PANE` | `<window>.<pane>` | tmux環境内 |
 | `CLAUDE_ROLE` | `leader` / `worker` | tmux環境内 |
-| `CLAUDE_WORKER_PANE` | ワーカーペイン番号 | 自動作成時のみ |
+| `CLAUDE_WORKER_SESSION` | ワーカーのセッション名 | 自動作成時のみ |
+| `CLAUDE_WORKER_WINDOW` | ワーカーのウィンドウ番号 | 自動作成時のみ |
+| `CLAUDE_WORKER_PANE` | ワーカーのペイン番号 | 自動作成時のみ |
 
 ### Commands Layer
 
@@ -446,7 +450,7 @@ graph LR
 **worker-info ファイル**:
 - ロケーション: `${CLAUDE_PROJECT_DIR}/.claude/worker-info`
 - フォーマット: Shell script（export文、sourceで読み込み可能）
-- フィールド: `CLAUDE_WORKER_PANE`（必須）, `CLAUDE_WORKER_SESSION`（必須）
+- フィールド: `CLAUDE_WORKER_SESSION`（必須）, `CLAUDE_WORKER_WINDOW`（必須）, `CLAUDE_WORKER_PANE`（必須）
 
 **task-counter ファイル**:
 - ロケーション: `${CLAUDE_PROJECT_DIR}/.claude/.task-counter-YYYYMMDD`

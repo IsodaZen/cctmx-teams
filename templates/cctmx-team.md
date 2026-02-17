@@ -305,7 +305,7 @@ Claude Codeの起動時、SessionStart Hookが以下の環境変数を自動設�
 1. 現在のtmuxウィンドウを垂直分割（右側にペインを作成）
 2. ワーカーペインでプロジェクトディレクトリに移動
 3. ワーカーペインでClaude Codeを起動
-4. ワーカーペイン番号を `.claude/worker-info` に保存
+4. ワーカーペイン情報（セッション名、ウィンドウ番号、ペイン番号）を `.claude/worker-info` に保存
 
 **使用タイミング**:
 
@@ -471,7 +471,9 @@ SessionStart Hookが以下の環境変数を自動設定する:
 | `CLAUDE_TMUX_SESSION` | tmuxセッション名 | `claude-dev` |
 | `CLAUDE_TMUX_PANE` | 現在のペイン番号 | `0.0` |
 | `CLAUDE_ROLE` | 役割 | `leader` / `worker` |
-| `CLAUDE_WORKER_PANE` | ワーカーペイン番号（リーダーが保持） | `0.1` |
+| `CLAUDE_WORKER_SESSION` | ワーカーのセッション名（リーダーが保持） | `claude-dev` |
+| `CLAUDE_WORKER_WINDOW` | ワーカーのウィンドウ番号（リーダーが保持） | `0` |
+| `CLAUDE_WORKER_PANE` | ワーカーのペイン番号（リーダーが保持） | `1` |
 
 ### 手動セットアップ
 
@@ -589,7 +591,7 @@ cat .claude/worker-info
 
 ```bash
 # ペインを削除
-tmux kill-pane -t ${CLAUDE_WORKER_SESSION}:${CLAUDE_WORKER_PANE}
+tmux kill-pane -t ${CLAUDE_WORKER_SESSION}:${CLAUDE_WORKER_WINDOW}.${CLAUDE_WORKER_PANE}
 
 # 新しいワーカーペインを作成
 /tmux-worker

@@ -13,22 +13,24 @@ fi
 # shellcheck source=/dev/null
 source "$worker_info_file"
 
-if [ -z "${CLAUDE_WORKER_PANE:-}" ] || [ -z "${CLAUDE_WORKER_SESSION:-}" ]; then
+if [ -z "${CLAUDE_WORKER_SESSION:-}" ] || [ -z "${CLAUDE_WORKER_WINDOW:-}" ] || [ -z "${CLAUDE_WORKER_PANE:-}" ]; then
   echo "❌ エラー: ワーカーペイン情報が不正です" >&2
+  echo "worker-infoの内容:" >&2
+  cat "$worker_info_file" >&2
   exit 1
 fi
 
 session="${CLAUDE_WORKER_SESSION}"
-worker_pane="${CLAUDE_WORKER_PANE}"
+tmux_target="${session}:${CLAUDE_WORKER_WINDOW}.${CLAUDE_WORKER_PANE}"
 
 echo "🔍 ワーカーのエラーをチェック中..." >&2
-echo "セッション: ${session}" >&2
-echo "ペイン: ${worker_pane}" >&2
+echo "ターゲット: ${tmux_target}" >&2
 echo "" >&2
 
 # ワーカーの出力をキャプチャ
-if ! output=$(tmux capture-pane -t "${session}:${worker_pane}" -p -S -3000 2>&1); then
+if ! output=$(tmux capture-pane -t "${tmux_target}" -p -S -3000 2>&1); then
   echo "❌ エラー: ワーカーペインの出力を取得できませんでした" >&2
+  echo "ターゲット: ${tmux_target}" >&2
   echo "$output" >&2
   exit 1
 fi

@@ -106,9 +106,25 @@ if [ "$pane_count" -eq 1 ]; then
 
   log "ワーカーペインを作成: ${worker_pane_full}"
 
-  # ワーカーペイン番号を環境変数に保存
-  write_env "export CLAUDE_WORKER_PANE=${worker_pane_full}"
-  log "環境変数を永続化: CLAUDE_WORKER_PANE=${worker_pane_full}"
+  # ワーカーペイン番号を環境変数に保存（SESSION, WINDOW, PANEを分離）
+  write_env "export CLAUDE_WORKER_SESSION=${tmux_session}"
+  write_env "export CLAUDE_WORKER_WINDOW=${tmux_window}"
+  write_env "export CLAUDE_WORKER_PANE=${worker_pane}"
+  log "環境変数を永続化: CLAUDE_WORKER_SESSION=${tmux_session}, CLAUDE_WORKER_WINDOW=${tmux_window}, CLAUDE_WORKER_PANE=${worker_pane}"
+
+  # worker-infoファイルを作成（tmux-send等のスキルが参照する）
+  if [ -n "${CLAUDE_PROJECT_DIR:-}" ]; then
+    worker_info_dir="${CLAUDE_PROJECT_DIR}/.claude"
+    mkdir -p "$worker_info_dir"
+    {
+      echo "export CLAUDE_WORKER_SESSION=${tmux_session}"
+      echo "export CLAUDE_WORKER_WINDOW=${tmux_window}"
+      echo "export CLAUDE_WORKER_PANE=${worker_pane}"
+    } > "${worker_info_dir}/worker-info"
+    log "worker-infoファイルを作成: ${worker_info_dir}/worker-info"
+  else
+    log "警告: CLAUDE_PROJECT_DIRが未定義のため、worker-infoファイルを作成できません"
+  fi
 
   # ワーカーペインでClaudeCodeを起動
   # 重要: tmux split-windowは親ペインの環境変数を継承するため、
@@ -117,7 +133,7 @@ if [ "$pane_count" -eq 1 ]; then
   sleep 0.5  # ペイン作成の完了を待つ
 
   log "ワーカーペインで継承された環境変数をクリア"
-  tmux send-keys -t "${tmux_session}:${worker_pane_full}" "unset CLAUDE_ROLE CLAUDE_TMUX_PANE CLAUDE_TMUX_SESSION CLAUDE_WORKER_PANE" Enter
+  tmux send-keys -t "${tmux_session}:${worker_pane_full}" "unset CLAUDE_ROLE CLAUDE_TMUX_PANE CLAUDE_TMUX_SESSION CLAUDE_WORKER_PANE CLAUDE_WORKER_WINDOW" Enter
   sleep 0.3
 
   log "ワーカーペインに正しい環境変数を設定"

@@ -104,7 +104,7 @@ bash ${CLAUDE_PLUGIN_ROOT}/skills/tmux-check/scripts/check-errors.sh
 
 ```bash
 # ワーカーペインを削除
-tmux kill-pane -t ${CLAUDE_WORKER_SESSION}:${CLAUDE_WORKER_PANE}
+tmux kill-pane -t ${CLAUDE_WORKER_SESSION}:${CLAUDE_WORKER_WINDOW}.${CLAUDE_WORKER_PANE}
 
 # 新しいワーカーペインを作成
 /tmux-worker
