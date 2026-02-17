@@ -52,7 +52,7 @@ bash ${CLAUDE_PLUGIN_ROOT}/skills/tmux-worker/scripts/create-worker.sh
 
 1. 右側にワーカーペインを作成
 2. ワーカーペインでClaudeCodeを起動
-3. ワーカーペイン番号を `.claude/worker-info` に保存
+3. ワーカーペイン情報（セッション名、ウィンドウ番号、ペイン番号）を `.claude/worker-info` に保存
 
 ## 実行後の作業
 

@@ -172,12 +172,13 @@ claude
 
 ### `.claude/worker-info`
 
-ワーカーペインの接続情報を保持するファイルです。`/tmux-worker` 実行時に自動生成されます。
+ワーカーペインの接続情報を保持するファイルです。`/tmux-worker` 実行時またはSessionStart Hookによるワーカー自動作成時に生成されます。
 
 - **形式**: Shell export文（sourceで読み込み可能）
 - **フィールド**:
-  - `CLAUDE_WORKER_PANE`: ワーカーペインの識別子（`<window>.<pane>`形式）
   - `CLAUDE_WORKER_SESSION`: tmuxセッション名
+  - `CLAUDE_WORKER_WINDOW`: tmuxウィンドウ番号
+  - `CLAUDE_WORKER_PANE`: tmuxペイン番号
 - **用途**: `/tmux-send`、`/tmux-review`、`/tmux-check` がワーカーペインを特定するために使用
 
 ### `.claude/.task-counter-YYYYMMDD`

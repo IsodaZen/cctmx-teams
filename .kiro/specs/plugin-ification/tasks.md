@@ -10,7 +10,7 @@
 
 - [x] 2. スキルの実装
 - [x] 2.1 (P) tmux-workerスキルの実装
-  - 新しいワーカーペインをtmux split-windowで作成し、worker-infoファイルにペイン情報（セッション名、ペイン番号）を保存する機能を実装
+  - 新しいワーカーペインをtmux split-windowで作成し、worker-infoファイルにペイン情報（セッション名、ウィンドウ番号、ペイン番号）を保存する機能を実装
   - tmux環境変数の検証、ワーカーペインでのプロジェクトディレクトリ移動とClaude起動
   - SKILL.mdにスキル定義（使用タイミング、動作説明、前提条件、トラブルシューティング）を記載
   - 全パスを${CLAUDE_PLUGIN_ROOT}と${CLAUDE_PROJECT_DIR}ベースで記述
