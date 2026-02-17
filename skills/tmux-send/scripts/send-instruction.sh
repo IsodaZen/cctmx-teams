@@ -15,11 +15,24 @@ source "$worker_info_file"
 
 if [ -z "${CLAUDE_WORKER_PANE:-}" ] || [ -z "${CLAUDE_WORKER_SESSION:-}" ]; then
   echo "❌ エラー: ワーカーペイン情報が不正です" >&2
+  echo "worker-infoの内容:" >&2
+  cat "$worker_info_file" >&2
   exit 1
 fi
 
 session="${CLAUDE_WORKER_SESSION}"
-worker_pane="${CLAUDE_WORKER_PANE}"
+
+# tmuxターゲットを構築（session:window.pane 形式）
+if [ -n "${CLAUDE_WORKER_WINDOW:-}" ]; then
+  # 新形式: SESSION, WINDOW, PANE が分離
+  tmux_target="${session}:${CLAUDE_WORKER_WINDOW}.${CLAUDE_WORKER_PANE}"
+elif [[ "${CLAUDE_WORKER_PANE}" == *.* ]]; then
+  # 旧形式互換: CLAUDE_WORKER_PANE が window.pane 形式（例: 0.1）
+  tmux_target="${session}:${CLAUDE_WORKER_PANE}"
+else
+  # フォールバック: PANE のみの場合はウィンドウ0を仮定
+  tmux_target="${session}:0.${CLAUDE_WORKER_PANE}"
+fi
 
 # .claudeディレクトリの作成（存在しない場合）
 mkdir -p "${CLAUDE_PROJECT_DIR}/.claude"
@@ -43,8 +56,7 @@ fi
 task_id="TASK-${task_date}-${task_number}"
 
 echo "📤 ワーカーに指示を送信中..." >&2
-echo "セッション: ${session}" >&2
-echo "ペイン: ${worker_pane}" >&2
+echo "ターゲット: ${tmux_target}" >&2
 echo "タスクID: ${task_id}" >&2
 echo "" >&2
 
@@ -64,8 +76,15 @@ ${instruction}"
 
 # ワーカーに送信（tmux load-buffer + paste-bufferを使用）
 echo "$full_instruction" | tmux load-buffer -
-tmux paste-buffer -t "${session}:${worker_pane}"
-tmux send-keys -t "${session}:${worker_pane}" Enter
+if ! tmux paste-buffer -t "${tmux_target}" 2>&1; then
+  echo "❌ エラー: tmuxターゲットが見つかりません" >&2
+  echo "ターゲット: ${tmux_target}" >&2
+  echo "セッション: ${session}" >&2
+  echo "ウィンドウ: ${CLAUDE_WORKER_WINDOW:-未設定}" >&2
+  echo "ペイン: ${CLAUDE_WORKER_PANE}" >&2
+  exit 1
+fi
+tmux send-keys -t "${tmux_target}" Enter
 
 echo "" >&2
 echo "✅ 指示を送信しました" >&2

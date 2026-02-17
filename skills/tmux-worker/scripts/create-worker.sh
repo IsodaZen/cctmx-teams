@@ -24,38 +24,40 @@ fi
 # ペイン番号は動的に割り当てられるため、list-panesで確認
 all_panes=$(tmux list-panes -t "${session}:${window_number}" -F '#{pane_index}')
 worker_pane_index=$(echo "$all_panes" | tail -1)
-worker_pane="${window_number}.${worker_pane_index}"
+# tmuxターゲット形式: session:window.pane
+worker_target="${window_number}.${worker_pane_index}"
 
-echo "📝 ワーカーペイン番号: ${worker_pane}" >&2
+echo "📝 ワーカーペイン: ${session}:${worker_target}" >&2
 
 # 重要: tmux split-windowは親ペインの環境変数を継承するため、
 # CLAUDE_ROLE=leader が継承されてしまう。
 # ClaudeCode起動前に継承された環境変数をクリアし、正しい値を設定する。
 echo "🔄 ワーカーペインの環境変数を設定中..." >&2
-tmux send-keys -t "${session}:${worker_pane}" "unset CLAUDE_ROLE CLAUDE_TMUX_PANE CLAUDE_TMUX_SESSION CLAUDE_WORKER_PANE" Enter
+tmux send-keys -t "${session}:${worker_target}" "unset CLAUDE_ROLE CLAUDE_TMUX_PANE CLAUDE_TMUX_SESSION CLAUDE_WORKER_PANE CLAUDE_WORKER_WINDOW" Enter
 sleep 0.3
 
-tmux send-keys -t "${session}:${worker_pane}" "export CLAUDE_ROLE=worker CLAUDE_TMUX_SESSION=${session} CLAUDE_TMUX_PANE=${worker_pane}" Enter
+tmux send-keys -t "${session}:${worker_target}" "export CLAUDE_ROLE=worker CLAUDE_TMUX_SESSION=${session} CLAUDE_TMUX_PANE=${worker_target}" Enter
 sleep 0.3
 
 # ワーカーペインでプロジェクトディレクトリに移動
-tmux send-keys -t "${session}:${worker_pane}" "cd ${CLAUDE_PROJECT_DIR}" Enter
+tmux send-keys -t "${session}:${worker_target}" "cd ${CLAUDE_PROJECT_DIR}" Enter
 
 # 少し待機（ディレクトリ移動の完了を待つ）
 sleep 1
 
 # ClaudeCodeを起動
 echo "🚀 ClaudeCodeを起動中..." >&2
-tmux send-keys -t "${session}:${worker_pane}" "claude" Enter
+tmux send-keys -t "${session}:${worker_target}" "claude" Enter
 
-# ワーカーペイン情報を保存
+# ワーカーペイン情報を保存（SESSION, WINDOW, PANEを分離して保存）
 worker_info_file="${CLAUDE_PROJECT_DIR}/.claude/worker-info"
 {
-  echo "export CLAUDE_WORKER_PANE=${worker_pane}"
   echo "export CLAUDE_WORKER_SESSION=${session}"
+  echo "export CLAUDE_WORKER_WINDOW=${window_number}"
+  echo "export CLAUDE_WORKER_PANE=${worker_pane_index}"
 } > "$worker_info_file"
 
-echo "✅ ワーカーペインを作成しました: ${session}:${worker_pane}" >&2
+echo "✅ ワーカーペインを作成しました: ${session}:${worker_target}" >&2
 echo "" >&2
 echo "次のステップ:" >&2
 echo "1. 構造化指示を作成" >&2

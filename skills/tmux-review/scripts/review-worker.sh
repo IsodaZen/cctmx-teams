@@ -15,20 +15,30 @@ source "$worker_info_file"
 
 if [ -z "${CLAUDE_WORKER_PANE:-}" ] || [ -z "${CLAUDE_WORKER_SESSION:-}" ]; then
   echo "❌ エラー: ワーカーペイン情報が不正です" >&2
+  echo "worker-infoの内容:" >&2
+  cat "$worker_info_file" >&2
   exit 1
 fi
 
 session="${CLAUDE_WORKER_SESSION}"
-worker_pane="${CLAUDE_WORKER_PANE}"
+
+# tmuxターゲットを構築（session:window.pane 形式）
+if [ -n "${CLAUDE_WORKER_WINDOW:-}" ]; then
+  tmux_target="${session}:${CLAUDE_WORKER_WINDOW}.${CLAUDE_WORKER_PANE}"
+elif [[ "${CLAUDE_WORKER_PANE}" == *.* ]]; then
+  tmux_target="${session}:${CLAUDE_WORKER_PANE}"
+else
+  tmux_target="${session}:0.${CLAUDE_WORKER_PANE}"
+fi
 
 echo "📊 ワーカーの出力をキャプチャ中..." >&2
-echo "セッション: ${session}" >&2
-echo "ペイン: ${worker_pane}" >&2
+echo "ターゲット: ${tmux_target}" >&2
 echo "" >&2
 
 # ワーカーの出力をキャプチャ
-if ! output=$(tmux capture-pane -t "${session}:${worker_pane}" -p -S -3000 2>&1); then
+if ! output=$(tmux capture-pane -t "${tmux_target}" -p -S -3000 2>&1); then
   echo "❌ エラー: ワーカーペインの出力を取得できませんでした" >&2
+  echo "ターゲット: ${tmux_target}" >&2
   echo "$output" >&2
   exit 1
 fi
